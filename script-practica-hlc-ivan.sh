@@ -34,10 +34,11 @@ ssh -i /home/ivan/.ssh/id_ecdsa debian@$IP "su root -c 'echo 'maquina1' > /etc/h
 # Crea un volumen adicional de 1 GiB de tamaño en formato RAW ubicado en el pool por defecto.
 virsh -c qemu:///system vol-create-as default maquina1-2 1G --format raw
 
-# Una vez iniciada la MV maquina1, conecta el volumen a la máquina, crea un sistema de ficheros XFS en el volumen y móntalo en el directorio /var/www/html. Ten cuidado con los propietarios y grupos que pongas, para que funcione adecuadamente el siguiente punto.
+# Una vez iniciada la MV maquina1, conecta el volumen a la máquina, crea un sistema de ficheros XFS en el volumen y móntalo en el directorio /var/www/html de forma persistente. Ten cuidado con los propietarios y grupos que pongas, para que funcione adecuadamente el siguiente punto.
 
 virsh -c qemu:///system attach-disk maquina1 /var/lib/libvirt/images/maquina1-2 vdb --targetbus virtio --persistent
 ssh -i /home/ivan/.ssh/id_ecdsa debian@$IP "su root -c '/usr/sbin/mkfs.xfs -f /dev/vdb && mkdir -p /var/www/html && mount /dev/vdb /var/www/html'"
+ssh -i /home/ivan/.ssh/id_ecdsa debian@$IP "su root -c 'echo "/dev/vdb /var/www/html xfs defaults 0 0" >> /etc/fstab'"
 ssh -i /home/ivan/.ssh/id_ecdsa debian@$IP "su root -c 'chown -R www-data:www-data /var/www/html'"
 ssh -i /home/ivan/.ssh/id_ecdsa debian@$IP "su root -c 'chmod -R 755 /var/www/html'"
 
@@ -64,7 +65,7 @@ virsh -c qemu:///system start maquina1 && sleep 15 && ssh -i /home/ivan/.ssh/id_
 read -p "Mostrando la IP de br0. Pulsa enter para continuar"
 
 # Apaga maquina1 y auméntale la RAM a 2 GiB y vuelve a iniciar la máquina.
-virsh -c qemu:///system shutdown maquina1 && sleep 15 && virsh -c qemu:///system setmaxmem maquina1 2G --config && virsh -c qemu:///system start maquina1
+virsh -c qemu:///system shutdown maquina1 && sleep 15 && virsh -c qemu:///system setmaxmem maquina1 2G --config && virsh -c qemu:///system setmem maquina1 2G --config && virsh -c qemu:///system start maquina1
 
-# Crea un snapshot de la máquina virtual.
-virsh -c qemu:///system snapshot-create-as maquina1 --name snapshot1 --atomic
+# Crea un snapshot de la máquina virtual que soporte tipo de almacenaje raw para los discos vda y vdb.
+virsh -c qemu:///system shutdown maquina1 && sleep 15 && virsh -c qemu:///system snapshot-create-as maquina1 --name snapshot1 --disk-only --atomic

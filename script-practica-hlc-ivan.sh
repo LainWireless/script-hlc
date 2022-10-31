@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # Crea una imagen nueva, que utilice bullseye-base.qcow2 como imagen base y tenga 5 GiB de tamaño máximo. Esta imagen se denominará maquina1.qcow2.
-sudo qemu-img create -f qcow2 -b /var/lib/libvirt/images/bullseye-base-sparse.qcow2 /var/lib/libvirt/images/maquina1.qcow2 5G
+qemu-img create -f qcow2 -b bullseye-base-sparse.qcow2 maquina1.qcow2 5G
+cp maquina1.qcow2 newmaquina1.qcow2
+virt-resize --expand /dev/sda1 maquina1.qcow2 newmaquina1.qcow2
+mv newmaquina1.qcow2 maquina1.qcow2
 
 # Crea una red interna de nombre intra con salida al exterior mediante NAT que utilice la red 10.10.20.0/24.
 
@@ -14,7 +17,7 @@ virt-install --connect qemu:///system \
     --name maquina1 \
     --ram 1024 \
     --vcpus 1 \
-    --disk path=/var/lib/libvirt/images/maquina1.qcow2 \
+    --disk path=maquina1.qcow2 \
     --network network=intra \
     --os-type linux \
     --os-variant debian10 \

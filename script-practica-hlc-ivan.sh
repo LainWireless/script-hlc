@@ -75,3 +75,4 @@ virsh -c qemu:///system shutdown maquina1 && sleep 15 && virsh -c qemu:///system
 
 # Crea un snapshot de la máquina virtual que soporte tipo de almacenaje raw para los discos vda y vdb.
 virsh -c qemu:///system shutdown maquina1 && sleep 15 && virsh -c qemu:///system snapshot-create-as maquina1 --name snapshot1 --disk-only --atomic
+

@@ -47,10 +47,12 @@ ssh -i ~/.ssh/id_ecdsa debian@$IP "su root -c 'chmod -R 755 /var/www/html'"
 
 # Instala en maquina1 el servidor web apache2. Copia un fichero index.html a la máquina virtual.
 
-ssh -i ~/.ssh/id_ecdsa debian@$IP "su root -c 'apt-get update && sudo apt-get install apache2 -y'"
+ssh -i ~/.ssh/id_ecdsa debian@$IP "su root -c 'apt-get update'"
+ssh -i ~/.ssh/id_ecdsa debian@$IP "su root -c 'apt-get install -y apache2'"
 ssh -i ~/.ssh/id_ecdsa debian@$IP "su root -c 'systemctl enable apache2'"
 echo "Hola mundo" > index.html
-scp -i ~/.ssh/id_ecdsa index.html debian@$IP:/var/www/html
+scp -i ~/.ssh/id_ecdsa index.html debian@$IP:/home/debian/
+ssh -i ~/.ssh/id_ecdsa debian@$IP "su root -c 'mv /home/debian/index.html /var/www/html/'"
 ssh -i ~/.ssh/id_ecdsa debian@$IP "su root -c 'systemctl restart apache2'"
 
 # Muestra por pantalla la dirección IP de máquina1. Pausa el script y comprueba que puedes acceder a la página web.
